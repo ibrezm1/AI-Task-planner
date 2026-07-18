@@ -1,16 +1,42 @@
-# React + Vite
+# AI Co-Pilot: Task Generator & Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, offline-first dashboard designed to help you set goals, plan, and organize your work using state-of-the-art AI. Fully responsive, premium user interface with local-first persistence and MongoDB cloud synchronization.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Goal-Oriented Task Board**: Define long-term goals and split them down into specific tasks.
+- **AI Planning Coach**: Integrated Gemini and OpenRouter models that generate proposed task lists for any goal, acting as your personal task management consultant.
+- **Interactive Kanban Board**: Track task progress across pending, in-progress, and completed states.
+- **Calendar View**: Schedule and visualize your tasks on a responsive, interactive calendar interface.
+- **Premium Aesthetics**: High-end styling with custom dark/light themes, smooth micro-animations, and glassmorphism.
+- **Flexible Data Sync**: Local-first persistence using LocalStorage with cloud backup synchronization via a Vercel-hosted serverless MongoDB API.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React (built using Vite)
+- **Icons**: Lucide React
+- **Styling**: Modern CSS Custom Properties
+- **Sync Backend**: MongoDB serverless API hosted on Vercel
+- **AI Integrations**: Google Gemini API & OpenRouter API
 
-## Expanding the ESLint configuration
+## 📦 Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+To run the project locally:
+
+```bash
+# Install dependencies
+npm install
+
+# Run the dev server
+npm run dev
+```
+
+To build and preview:
+
+```bash
+# Build production bundle
+npm run build
+
+# Preview build locally
+npm run preview
+```
