@@ -51,7 +51,7 @@ export const aiService = {
         currentDate = new Date().toISOString().split('T')[0]
     }) => {
         if (!apiKey) {
-            throw new Error(`API Key for ${provider === 'gemini' ? 'Gemini' : 'OpenRouter'} is missing. Please configure it in Settings.`);
+            throw new Error(`API Key for ${provider === 'gemini' ? 'Gemini' : (provider === 'nvidia' ? 'Nvidia NIM' : 'OpenRouter')} is missing. Please configure it in Settings.`);
         }
         const cleanKey = apiKey.trim();
 
@@ -135,6 +135,57 @@ Each task object in the JSON array must follow this schema:
                 throw new Error("AI output was not in the expected JSON format. Please try again.");
             }
 
+        } else if (provider === 'nvidia') {
+            const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
+            const url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${cleanKey}`
+                },
+                body: JSON.stringify({
+                    model: nvidiaModel,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: systemInstructions
+                        },
+                        {
+                            role: 'user',
+                            content: promptText
+                        }
+                    ],
+                    response_format: { type: 'json_object' }
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Nvidia NIM API Error: ${response.status} - ${errText}`);
+            }
+
+            const data = await response.json();
+            const text = data.choices?.[0]?.message?.content;
+            if (!text) {
+                throw new Error("Empty response received from Nvidia NIM API.");
+            }
+
+            try {
+                const parsed = extractJSON(text);
+                if (Array.isArray(parsed)) {
+                    return parsed;
+                } else if (parsed.tasks && Array.isArray(parsed.tasks)) {
+                    return parsed.tasks;
+                } else {
+                    return Object.values(parsed).find(val => Array.isArray(val)) || [parsed];
+                }
+            } catch (parseError) {
+                console.error("Failed to parse Nvidia NIM output as JSON. Output was:", text);
+                throw new Error("AI output was not in the expected JSON format. Please try again.", { cause: parseError });
+            }
+
         } else {
             const openRouterModel = model || 'meta-llama/llama-3-8b-instruct:free';
             const url = 'https://openrouter.ai/api/v1/chat/completions';
@@ -199,7 +250,7 @@ Each task object in the JSON array must follow this schema:
         chatHistory = []
     }) => {
         if (!apiKey) {
-            throw new Error(`API Key for ${provider === 'gemini' ? 'Gemini' : 'OpenRouter'} is missing. Please configure it in Settings.`);
+            throw new Error(`API Key for ${provider === 'gemini' ? 'Gemini' : (provider === 'nvidia' ? 'Nvidia NIM' : 'OpenRouter')} is missing. Please configure it in Settings.`);
         }
         const cleanKey = apiKey.trim();
 
@@ -242,6 +293,48 @@ Provide detailed, structured responses formatted in Markdown.`;
             const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) {
                 throw new Error("Empty response received from Gemini API.");
+            }
+            return text;
+
+        } else if (provider === 'nvidia') {
+            const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
+            const url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+
+            // Format chat history for standard chat completions
+            const messages = [
+                { role: 'system', content: systemInstructions },
+                ...chatHistory.map(msg => ({
+                    role: msg.role === 'user' ? 'user' : 'assistant',
+                    content: msg.content
+                }))
+            ];
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${cleanKey}`
+                },
+                body: JSON.stringify({
+                    model: nvidiaModel,
+                    messages: messages
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Nvidia NIM API Error: ${response.status} - ${errText}`);
+            }
+
+            const data = await response.json();
+            let text = data.choices?.[0]?.message?.content;
+            if (!text) {
+                throw new Error("Empty response received from Nvidia NIM API.");
+            }
+
+            const reasoning = data.choices?.[0]?.message?.reasoning_content;
+            if (reasoning) {
+                text = `> **Reasoning Process:**\n> ${reasoning.split('\n').join('\n> ')}\n\n${text}`;
             }
             return text;
 
@@ -295,7 +388,7 @@ Provide detailed, structured responses formatted in Markdown.`;
         task
     }) => {
         if (!apiKey) {
-            throw new Error(`API Key for ${provider === 'gemini' ? 'Gemini' : 'OpenRouter'} is missing. Please configure it in Settings.`);
+            throw new Error(`API Key for ${provider === 'gemini' ? 'Gemini' : (provider === 'nvidia' ? 'Nvidia NIM' : 'OpenRouter')} is missing. Please configure it in Settings.`);
         }
         const cleanKey = apiKey.trim();
 
@@ -346,6 +439,44 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
             const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) {
                 throw new Error("Empty response received from Gemini API.");
+            }
+            return text;
+
+        } else if (provider === 'nvidia') {
+            const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
+            const url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${cleanKey}`
+                },
+                body: JSON.stringify({
+                    model: nvidiaModel,
+                    messages: [
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Nvidia NIM API Error: ${response.status} - ${errText}`);
+            }
+
+            const data = await response.json();
+            let text = data.choices?.[0]?.message?.content;
+            if (!text) {
+                throw new Error("Empty response received from Nvidia NIM API.");
+            }
+
+            const reasoning = data.choices?.[0]?.message?.reasoning_content;
+            if (reasoning) {
+                text = `> **Reasoning Process:**\n> ${reasoning.split('\n').join('\n> ')}\n\n${text}`;
             }
             return text;
 

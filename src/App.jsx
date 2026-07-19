@@ -32,8 +32,10 @@ export default function App() {
     provider: 'gemini',
     geminiKey: '',
     openRouterKey: '',
+    nvidiaKey: '',
     geminiModel: 'gemini-2.5-flash',
     openRouterModel: 'meta-llama/llama-3-8b-instruct:free',
+    nvidiaModel: 'meta/llama-3.1-70b-instruct',
     filterFreeModels: true,
     mongoApiUrl: 'https://verecel-mongo.vercel.app/api/mongo',
     mongoConnectionString: '',
@@ -172,8 +174,10 @@ export default function App() {
       provider: 'gemini',
       geminiKey: '',
       openRouterKey: '',
+      nvidiaKey: '',
       geminiModel: 'gemini-2.5-flash',
       openRouterModel: 'meta-llama/llama-3-8b-instruct:free',
+      nvidiaModel: 'meta/llama-3.1-70b-instruct',
       filterFreeModels: true,
       mongoApiUrl: 'https://verecel-mongo.vercel.app/api/mongo',
       mongoConnectionString: '',
@@ -229,8 +233,12 @@ export default function App() {
     setAiChatLog(newChatLog);
 
     try {
-      const apiKey = settings.provider === 'gemini' ? settings.geminiKey : settings.openRouterKey;
-      const model = settings.provider === 'gemini' ? settings.geminiModel : settings.openRouterModel;
+      const apiKey = settings.provider === 'gemini' 
+        ? settings.geminiKey 
+        : (settings.provider === 'nvidia' ? settings.nvidiaKey : settings.openRouterKey);
+      const model = settings.provider === 'gemini' 
+        ? settings.geminiModel 
+        : (settings.provider === 'nvidia' ? settings.nvidiaModel : settings.openRouterModel);
       
       const goalTasks = tasks.filter(t => t.goalId === goal.id);
 
@@ -308,8 +316,12 @@ export default function App() {
     setAiChatLog(newChatLog);
 
     try {
-      const apiKey = settings.provider === 'gemini' ? settings.geminiKey : settings.openRouterKey;
-      const model = settings.provider === 'gemini' ? settings.geminiModel : settings.openRouterModel;
+      const apiKey = settings.provider === 'gemini' 
+        ? settings.geminiKey 
+        : (settings.provider === 'nvidia' ? settings.nvidiaKey : settings.openRouterKey);
+      const model = settings.provider === 'gemini' 
+        ? settings.geminiModel 
+        : (settings.provider === 'nvidia' ? settings.nvidiaModel : settings.openRouterModel);
 
       const aiResponse = await aiService.chatSupport({
         provider: settings.provider,
@@ -356,8 +368,12 @@ export default function App() {
     setAiChatLog(newChatLog);
 
     try {
-      const apiKey = settings.provider === 'gemini' ? settings.geminiKey : settings.openRouterKey;
-      const model = settings.provider === 'gemini' ? settings.geminiModel : settings.openRouterModel;
+      const apiKey = settings.provider === 'gemini' 
+        ? settings.geminiKey 
+        : (settings.provider === 'nvidia' ? settings.nvidiaKey : settings.openRouterKey);
+      const model = settings.provider === 'gemini' 
+        ? settings.geminiModel 
+        : (settings.provider === 'nvidia' ? settings.nvidiaModel : settings.openRouterModel);
 
       const helpText = await aiService.getTaskHelp({
         provider: settings.provider,

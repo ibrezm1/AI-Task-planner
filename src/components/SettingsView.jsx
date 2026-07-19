@@ -33,12 +33,15 @@ export default function SettingsView({
   // API Keys
   const [geminiKey, setGeminiKey] = useState(settings.geminiKey || '');
   const [openRouterKey, setOpenRouterKey] = useState(settings.openRouterKey || '');
+  const [nvidiaKey, setNvidiaKey] = useState(settings.nvidiaKey || '');
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [showOpenRouterKey, setShowOpenRouterKey] = useState(false);
+  const [showNvidiaKey, setShowNvidiaKey] = useState(false);
 
   // Models
   const [geminiModel, setGeminiModel] = useState(settings.geminiModel || 'gemini-1.5-flash');
   const [openRouterModel, setOpenRouterModel] = useState(settings.openRouterModel || 'meta-llama/llama-3-8b-instruct:free');
+  const [nvidiaModel, setNvidiaModel] = useState(settings.nvidiaModel || 'meta/llama-3.1-70b-instruct');
   const [openRouterModelsList, setOpenRouterModelsList] = useState([]);
   const [filterFreeModels, setFilterFreeModels] = useState(settings.filterFreeModels ?? true);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
@@ -64,8 +67,10 @@ export default function SettingsView({
       setProvider(settings.provider || 'gemini');
       setGeminiKey(settings.geminiKey || '');
       setOpenRouterKey(settings.openRouterKey || '');
+      setNvidiaKey(settings.nvidiaKey || '');
       setGeminiModel(settings.geminiModel || 'gemini-1.5-flash');
       setOpenRouterModel(settings.openRouterModel || 'meta-llama/llama-3-8b-instruct:free');
+      setNvidiaModel(settings.nvidiaModel || 'meta/llama-3.1-70b-instruct');
       setFilterFreeModels(settings.filterFreeModels ?? true);
       setMongoApiUrl(settings.mongoApiUrl || 'https://verecel-mongo.vercel.app/api/mongo');
       setMongoConnectionString(settings.mongoConnectionString || '');
@@ -103,8 +108,10 @@ export default function SettingsView({
       provider,
       geminiKey,
       openRouterKey,
+      nvidiaKey,
       geminiModel,
       openRouterModel,
+      nvidiaModel,
       filterFreeModels,
       mongoApiUrl,
       mongoConnectionString,
@@ -197,6 +204,14 @@ export default function SettingsView({
                 </button>
                 <button
                   type="button"
+                  onClick={() => setProvider('nvidia')}
+                  className={`btn ${provider === 'nvidia' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ flex: 1 }}
+                >
+                  Nvidia NIM API
+                </button>
+                <button
+                  type="button"
                   onClick={() => setProvider('openrouter')}
                   className={`btn ${provider === 'openrouter' ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ flex: 1 }}
@@ -241,6 +256,46 @@ export default function SettingsView({
                     <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                     <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
                   </select>
+                </div>
+              </div>
+            )}
+
+            {/* Nvidia Key & Model */}
+            {provider === 'nvidia' && (
+              <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Nvidia API Key</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showNvidiaKey ? 'text' : 'password'}
+                      placeholder="nvapi-..."
+                      className="input-field"
+                      value={nvidiaKey}
+                      onChange={e => setNvidiaKey(e.target.value)}
+                      style={{ paddingRight: '45px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNvidiaKey(!showNvidiaKey)}
+                      style={{ position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                    >
+                      {showNvidiaKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Nvidia NIM Model</label>
+                  <input
+                    type="text"
+                    placeholder="meta/llama-3.1-70b-instruct"
+                    className="input-field"
+                    value={nvidiaModel}
+                    onChange={e => setNvidiaModel(e.target.value)}
+                  />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    E.g., <code>meta/llama-3.1-70b-instruct</code>, <code>openai/gpt-oss-120b</code>, or <code>deepseek-ai/deepseek-r1</code>.
+                  </span>
                 </div>
               </div>
             )}
