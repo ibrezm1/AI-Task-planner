@@ -18,72 +18,139 @@ const parseBold = (text) => {
   return parts.map((part, i) => i % 2 === 1 ? <strong key={i} style={{ fontWeight: 700 }}>{part}</strong> : part);
 };
 
-const renderLatex = (text) => {
-  if (!text) return '';
+const renderLineContent = (lineText) => {
+  if (!lineText) return '';
   if (!window.katex) {
-    return parseBold(text); // Fallback to bold parsing if KaTeX hasn't loaded yet
+    return parseBold(lineText);
   }
-
-  // Split by $$ (block math) first
-  const blockParts = text.split(/\$\$(.*?)\$\$/gs);
-  return blockParts.map((blockPart, blockIdx) => {
-    // Odd indices are block math
-    if (blockIdx % 2 === 1) {
+  const inlineParts = lineText.split(/\$(.*?)\$/g);
+  return inlineParts.map((inlinePart, inlineIdx) => {
+    // Odd indices are inline math
+    if (inlineIdx % 2 === 1) {
       try {
-        const html = window.katex.renderToString(blockPart, { displayMode: true, throwOnError: false });
-        return <div key={`block-${blockIdx}`} className="katex-block" dangerouslySetInnerHTML={{ __html: html }} style={{ margin: '14px 0', overflowX: 'auto' }} />;
+        const html = window.katex.renderToString(inlinePart, { displayMode: false, throwOnError: false });
+        return <span key={`inline-${inlineIdx}`} className="katex-inline" dangerouslySetInnerHTML={{ __html: html }} />;
       } catch (err) {
-        return <div key={`block-${blockIdx}`} className="katex-error" style={{ color: 'var(--danger-color)', margin: '8px 0' }}>$${blockPart}$$</div>;
+        return <span key={`inline-${inlineIdx}`} className="katex-error" style={{ color: 'var(--danger-color)' }}>${inlinePart}$</span>;
       }
     }
-
-    // Even indices are text which might contain inline math ($...$)
-    const inlineParts = blockPart.split(/\$(.*?)\$/g);
-    return inlineParts.map((inlinePart, inlineIdx) => {
-      // Odd indices are inline math
-      if (inlineIdx % 2 === 1) {
-        try {
-          const html = window.katex.renderToString(inlinePart, { displayMode: false, throwOnError: false });
-          return <span key={`inline-${blockIdx}-${inlineIdx}`} className="katex-inline" dangerouslySetInnerHTML={{ __html: html }} />;
-        } catch (err) {
-          return <span key={`inline-${blockIdx}-${inlineIdx}`} className="katex-error" style={{ color: 'var(--danger-color)' }}>${inlinePart}$</span>;
-        }
-      }
-
-      // Even indices are standard plain text which might contain bold formatting (**)
-      return parseBold(inlinePart);
-    });
+    // Even indices are plain text which might contain bold formatting
+    return parseBold(inlinePart);
   });
 };
 
 const renderMarkdown = (text) => {
   if (!text) return '';
-  return text.split('\n').map((line, index) => {
-    if (line.startsWith('### ')) {
-      return <h4 key={index} style={{ margin: '12px 0 6px 0', color: 'var(--accent-color)', fontWeight: 700 }}>{renderLatex(line.replace('### ', ''))}</h4>;
-    }
-    if (line.startsWith('## ')) {
-      return <h3 key={index} style={{ margin: '14px 0 8px 0', color: 'var(--accent-color)', fontWeight: 700 }}>{renderLatex(line.replace('## ', ''))}</h3>;
-    }
-    if (line.startsWith('# ')) {
-      return <h2 key={index} style={{ margin: '18px 0 10px 0', color: 'var(--accent-color)', fontWeight: 800 }}>{renderLatex(line.replace('# ', ''))}</h2>;
-    }
-    if (line.startsWith('- ') || line.startsWith('* ')) {
+
+  // 1. Split by code blocks first
+  const codeParts = text.split(/```/g);
+
+  return codeParts.map((part, codeIdx) => {
+    // Odd indices are code blocks
+    if (codeIdx % 2 === 1) {
+      const lines = part.split('\n');
+      const firstLine = lines[0].trim();
+      let language = '';
+      let code = part;
+      if (firstLine && !firstLine.includes(' ') && firstLine.length < 15) {
+        language = firstLine;
+        code = lines.slice(1).join('\n');
+      }
+
       return (
-        <li key={index} style={{ marginLeft: '20px', listStyleType: 'disc', margin: '6px 0' }}>
-          {renderLatex(line.substring(2))}
-        </li>
+        <div key={`code-${codeIdx}`} style={{
+          margin: '12px 0',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          border: '1px solid var(--border-color)',
+          backgroundColor: 'rgba(0, 0, 0, 0.45)',
+          fontFamily: 'monospace'
+        }}>
+          {language && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '6px 14px',
+              fontSize: '0.75rem',
+              color: 'var(--text-secondary)',
+              borderBottom: '1px solid var(--border-color)',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              textTransform: 'uppercase',
+              fontWeight: 600,
+              letterSpacing: '0.05em'
+            }}>
+              <span>{language}</span>
+            </div>
+          )}
+          <pre style={{
+            margin: 0,
+            padding: '14px',
+            overflowX: 'auto',
+            fontFamily: 'SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace',
+            fontSize: '0.85rem',
+            color: '#e2e8f0',
+            lineHeight: 1.5,
+            whiteSpace: 'pre'
+          }}>
+            <code>{code.trim()}</code>
+          </pre>
+        </div>
       );
     }
-    const numMatch = line.match(/^(\d+)\.\s(.*)/);
-    if (numMatch) {
-      return (
-        <li key={index} style={{ marginLeft: '20px', listStyleType: 'decimal', margin: '6px 0' }}>
-          {renderLatex(numMatch[2])}
-        </li>
-      );
-    }
-    return <p key={index} style={{ margin: '8px 0', lineHeight: 1.5 }}>{renderLatex(line)}</p>;
+
+    // Even indices are standard markdown text which may contain block math ($$...$$)
+    const blockParts = part.split(/\$\$(.*?)\$\$/gs);
+
+    return blockParts.map((blockPart, blockIdx) => {
+      // Odd indices are block math
+      if (blockIdx % 2 === 1) {
+        if (!window.katex) {
+          return <div key={`block-${codeIdx}-${blockIdx}`} className="katex-error" style={{ color: 'var(--danger-color)', margin: '8px 0' }}>$${blockPart}$$</div>;
+        }
+        try {
+          const html = window.katex.renderToString(blockPart, { displayMode: true, throwOnError: false });
+          return <div key={`block-${codeIdx}-${blockIdx}`} className="katex-block" dangerouslySetInnerHTML={{ __html: html }} style={{ margin: '14px 0', overflowX: 'auto' }} />;
+        } catch (err) {
+          return <div key={`block-${codeIdx}-${blockIdx}`} className="katex-error" style={{ color: 'var(--danger-color)', margin: '8px 0' }}>$${blockPart}$$</div>;
+        }
+      }
+
+      // Even indices are text blocks (can contain newlines, list items, headers)
+      const lines = blockPart.split('\n');
+      return lines.map((line, lineIdx) => {
+        const trimmed = line.trim();
+        if (trimmed === '') return null;
+
+        const key = `line-${codeIdx}-${blockIdx}-${lineIdx}`;
+
+        if (line.startsWith('### ')) {
+          return <h4 key={key} style={{ margin: '12px 0 6px 0', color: 'var(--accent-color)', fontWeight: 700 }}>{renderLineContent(line.replace('### ', ''))}</h4>;
+        }
+        if (line.startsWith('## ')) {
+          return <h3 key={key} style={{ margin: '14px 0 8px 0', color: 'var(--accent-color)', fontWeight: 700 }}>{renderLineContent(line.replace('## ', ''))}</h3>;
+        }
+        if (line.startsWith('# ')) {
+          return <h2 key={key} style={{ margin: '18px 0 10px 0', color: 'var(--accent-color)', fontWeight: 800 }}>{renderLineContent(line.replace('# ', ''))}</h2>;
+        }
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+          return (
+            <li key={key} style={{ marginLeft: '20px', listStyleType: 'disc', margin: '6px 0', lineHeight: 1.5 }}>
+              {renderLineContent(line.substring(2))}
+            </li>
+          );
+        }
+        const numMatch = line.match(/^(\d+)\.\s(.*)/);
+        if (numMatch) {
+          return (
+            <li key={key} style={{ marginLeft: '20px', listStyleType: 'decimal', margin: '6px 0', lineHeight: 1.5 }}>
+              {renderLineContent(numMatch[2])}
+            </li>
+          );
+        }
+        return <p key={key} style={{ margin: '8px 0', lineHeight: 1.5 }}>{renderLineContent(line)}</p>;
+      });
+    });
   });
 };
 
@@ -190,7 +257,7 @@ export default function AIConsultantView({
   const currentModelName = aiSettings.provider === 'gemini'
     ? (aiSettings.geminiModel || 'gemini-2.5-flash')
     : (aiSettings.provider === 'nvidia' 
-        ? (aiSettings.nvidiaModel || 'meta/llama-3.1-70b-instruct')
+        ? (aiSettings.nvidiaModel || 'openai/gpt-oss-120b')
         : (aiSettings.openRouterModel || 'meta-llama/llama-3-8b-instruct:free'));
 
   return (

@@ -140,8 +140,8 @@ Each task object in the JSON array must follow this schema:
             }
 
         } else if (provider === 'nvidia') {
-            const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
-            let url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            const nvidiaModel = model || 'openai/gpt-oss-120b';
+            let url = 'https://verecel-mongo.vercel.app/api/nvidia/chat/completions';
             if (corsProxy) {
                 url = corsProxy + url;
             }
@@ -311,8 +311,8 @@ Provide detailed, structured responses formatted in Markdown.`;
             return text;
 
         } else if (provider === 'nvidia') {
-            const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
-            let url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            const nvidiaModel = model || 'openai/gpt-oss-120b';
+            let url = 'https://verecel-mongo.vercel.app/api/nvidia/chat/completions';
             if (corsProxy) {
                 url = corsProxy + url;
             }
@@ -467,8 +467,8 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
             return text;
 
         } else if (provider === 'nvidia') {
-            const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
-            let url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            const nvidiaModel = model || 'openai/gpt-oss-120b';
+            let url = 'https://verecel-mongo.vercel.app/api/nvidia/chat/completions';
             if (corsProxy) {
                 url = corsProxy + url;
             }
@@ -587,8 +587,8 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
             return { success: true, message: "Gemini Key validated successfully!" };
 
         } else if (provider === 'nvidia') {
-            const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
-            let url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            const nvidiaModel = model || 'openai/gpt-oss-120b';
+            let url = 'https://verecel-mongo.vercel.app/api/nvidia/chat/completions';
             if (corsProxy) {
                 url = corsProxy + url;
             }

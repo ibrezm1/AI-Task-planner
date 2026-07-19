@@ -41,7 +41,7 @@ export default function SettingsView({
   // Models
   const [geminiModel, setGeminiModel] = useState(settings.geminiModel || 'gemini-1.5-flash');
   const [openRouterModel, setOpenRouterModel] = useState(settings.openRouterModel || 'meta-llama/llama-3-8b-instruct:free');
-  const [nvidiaModel, setNvidiaModel] = useState(settings.nvidiaModel || 'meta/llama-3.1-70b-instruct');
+  const [nvidiaModel, setNvidiaModel] = useState(settings.nvidiaModel || 'openai/gpt-oss-120b');
   const [openRouterModelsList, setOpenRouterModelsList] = useState([]);
   const [filterFreeModels, setFilterFreeModels] = useState(settings.filterFreeModels ?? true);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
@@ -80,7 +80,7 @@ export default function SettingsView({
       setCorsProxy(settings.corsProxy || '');
       setGeminiModel(settings.geminiModel || 'gemini-1.5-flash');
       setOpenRouterModel(settings.openRouterModel || 'meta-llama/llama-3-8b-instruct:free');
-      setNvidiaModel(settings.nvidiaModel || 'meta/llama-3.1-70b-instruct');
+      setNvidiaModel(settings.nvidiaModel || 'openai/gpt-oss-120b');
       setFilterFreeModels(settings.filterFreeModels ?? true);
       setMongoApiUrl(settings.mongoApiUrl || 'https://verecel-mongo.vercel.app/api/mongo');
       setMongoConnectionString(settings.mongoConnectionString || '');
@@ -437,13 +437,13 @@ export default function SettingsView({
                 <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Nvidia NIM Model</label>
                 <input
                   type="text"
-                  placeholder="meta/llama-3.1-70b-instruct"
+                  placeholder="openai/gpt-oss-120b"
                   className="input-field"
                   value={nvidiaModel}
                   onChange={e => setNvidiaModel(e.target.value)}
                 />
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                  E.g., <code>meta/llama-3.1-70b-instruct</code>, <code>openai/gpt-oss-120b</code>, or <code>deepseek-ai/deepseek-r1</code>.
+                  E.g., <code>openai/gpt-oss-120b</code>, <code>meta/llama-3.1-70b-instruct</code>, or <code>deepseek-ai/deepseek-r1</code>.
                 </span>
               </div>
 
