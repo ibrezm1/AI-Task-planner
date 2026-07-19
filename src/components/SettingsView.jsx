@@ -221,151 +221,241 @@ export default function SettingsView({
               </div>
             </div>
 
-            {/* Gemini Direct Key & Model */}
-            {provider === 'gemini' && (
-              <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Gemini API Key</label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type={showGeminiKey ? 'text' : 'password'}
-                      placeholder="AIzaSy..."
-                      className="input-field"
-                      value={geminiKey}
-                      onChange={e => setGeminiKey(e.target.value)}
-                      style={{ paddingRight: '45px' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowGeminiKey(!showGeminiKey)}
-                      style={{ position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-                    >
-                      {showGeminiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Gemini Model</label>
-                  <select
-                    className="input-field"
-                    value={geminiModel}
-                    onChange={e => setGeminiModel(e.target.value)}
-                  >
-                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {/* Nvidia Key & Model */}
-            {provider === 'nvidia' && (
-              <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Nvidia API Key</label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type={showNvidiaKey ? 'text' : 'password'}
-                      placeholder="nvapi-..."
-                      className="input-field"
-                      value={nvidiaKey}
-                      onChange={e => setNvidiaKey(e.target.value)}
-                      style={{ paddingRight: '45px' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNvidiaKey(!showNvidiaKey)}
-                      style={{ position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-                    >
-                      {showNvidiaKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Nvidia NIM Model</label>
-                  <input
-                    type="text"
-                    placeholder="meta/llama-3.1-70b-instruct"
-                    className="input-field"
-                    value={nvidiaModel}
-                    onChange={e => setNvidiaModel(e.target.value)}
-                  />
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                    E.g., <code>meta/llama-3.1-70b-instruct</code>, <code>openai/gpt-oss-120b</code>, or <code>deepseek-ai/deepseek-r1</code>.
+            {/* Google Gemini Configuration Card */}
+            <div 
+              className="fade-in"
+              style={{ 
+                padding: '16px', 
+                borderRadius: '12px', 
+                border: provider === 'gemini' ? '1.5px solid var(--accent-color)' : '1px solid var(--border-color)',
+                backgroundColor: provider === 'gemini' ? 'rgba(var(--accent-color-rgb), 0.04)' : 'transparent',
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '14px',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: provider === 'gemini' ? 'var(--accent-color)' : 'var(--text-primary)' }}>
+                  Google Gemini Engine
+                </h4>
+                {provider === 'gemini' ? (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--success-color)', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                    Active
                   </span>
-                </div>
-              </div>
-            )}
-
-            {/* OpenRouter Key & Model */}
-            {provider === 'openrouter' && (
-              <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OpenRouter API Key</label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type={showOpenRouterKey ? 'text' : 'password'}
-                      placeholder="sk-or-v1-..."
-                      className="input-field"
-                      value={openRouterKey}
-                      onChange={e => setOpenRouterKey(e.target.value)}
-                      style={{ paddingRight: '45px' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowOpenRouterKey(!showOpenRouterKey)}
-                      style={{ position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-                    >
-                      {showOpenRouterKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Free models toggle filter */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                  <input
-                    type="checkbox"
-                    id="filterFree"
-                    checked={filterFreeModels}
-                    onChange={e => setFilterFreeModels(e.target.checked)}
-                    style={{ cursor: 'pointer', accentColor: 'var(--accent-color)' }}
-                  />
-                  <label htmlFor="filterFree" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                    Filter Free Models Only
-                  </label>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OpenRouter Model</label>
-                  <select
-                    className="input-field"
-                    value={openRouterModel}
-                    onChange={e => setOpenRouterModel(e.target.value)}
-                    disabled={isLoadingModels}
+                ) : (
+                  <button 
+                    type="button" 
+                    onClick={() => setProvider('gemini')}
+                    className="btn btn-secondary" 
+                    style={{ padding: '4px 10px', fontSize: '0.72rem', height: 'auto' }}
                   >
-                    {isLoadingModels ? (
-                      <option>Loading models list...</option>
-                    ) : displayedModels.length > 0 ? (
-                      displayedModels.map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} {m.isFree ? '(Free)' : ''}
-                        </option>
-                      ))
-                    ) : (
-                      <>
-                        <option value="meta-llama/llama-3-8b-instruct:free">Llama 3 8B Instruct (Free)</option>
-                        <option value="google/gemini-2.5-flash:free">Gemini 2.5 Flash (Free)</option>
-                        <option value="qwen/qwen-2-7b-instruct:free">Qwen 2 7B Instruct (Free)</option>
-                        <option value="microsoft/phi-3-mini-128k-instruct:free">Phi 3 Mini (Free)</option>
-                      </>
-                    )}
-                  </select>
+                    Activate
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Gemini API Key</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showGeminiKey ? 'text' : 'password'}
+                    placeholder="AIzaSy..."
+                    className="input-field"
+                    value={geminiKey}
+                    onChange={e => setGeminiKey(e.target.value)}
+                    style={{ paddingRight: '45px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowGeminiKey(!showGeminiKey)}
+                    style={{ position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                  >
+                    {showGeminiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               </div>
-            )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Gemini Model</label>
+                <select
+                  className="input-field"
+                  value={geminiModel}
+                  onChange={e => setGeminiModel(e.target.value)}
+                >
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
+                  <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                  <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Nvidia NIM Configuration Card */}
+            <div 
+              className="fade-in"
+              style={{ 
+                padding: '16px', 
+                borderRadius: '12px', 
+                border: provider === 'nvidia' ? '1.5px solid var(--accent-color)' : '1px solid var(--border-color)',
+                backgroundColor: provider === 'nvidia' ? 'rgba(var(--accent-color-rgb), 0.04)' : 'transparent',
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '14px',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: provider === 'nvidia' ? 'var(--accent-color)' : 'var(--text-primary)' }}>
+                  Nvidia NIM Engine
+                </h4>
+                {provider === 'nvidia' ? (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--success-color)', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                    Active
+                  </span>
+                ) : (
+                  <button 
+                    type="button" 
+                    onClick={() => setProvider('nvidia')}
+                    className="btn btn-secondary" 
+                    style={{ padding: '4px 10px', fontSize: '0.72rem', height: 'auto' }}
+                  >
+                    Activate
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Nvidia API Key</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showNvidiaKey ? 'text' : 'password'}
+                    placeholder="nvapi-..."
+                    className="input-field"
+                    value={nvidiaKey}
+                    onChange={e => setNvidiaKey(e.target.value)}
+                    style={{ paddingRight: '45px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNvidiaKey(!showNvidiaKey)}
+                    style={{ position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                  >
+                    {showNvidiaKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Nvidia NIM Model</label>
+                <input
+                  type="text"
+                  placeholder="meta/llama-3.1-70b-instruct"
+                  className="input-field"
+                  value={nvidiaModel}
+                  onChange={e => setNvidiaModel(e.target.value)}
+                />
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  E.g., <code>meta/llama-3.1-70b-instruct</code>, <code>openai/gpt-oss-120b</code>, or <code>deepseek-ai/deepseek-r1</code>.
+                </span>
+              </div>
+            </div>
+
+            {/* OpenRouter Configuration Card */}
+            <div 
+              className="fade-in"
+              style={{ 
+                padding: '16px', 
+                borderRadius: '12px', 
+                border: provider === 'openrouter' ? '1.5px solid var(--accent-color)' : '1px solid var(--border-color)',
+                backgroundColor: provider === 'openrouter' ? 'rgba(var(--accent-color-rgb), 0.04)' : 'transparent',
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '14px',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: provider === 'openrouter' ? 'var(--accent-color)' : 'var(--text-primary)' }}>
+                  OpenRouter Engine Hub
+                </h4>
+                {provider === 'openrouter' ? (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--success-color)', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                    Active
+                  </span>
+                ) : (
+                  <button 
+                    type="button" 
+                    onClick={() => setProvider('openrouter')}
+                    className="btn btn-secondary" 
+                    style={{ padding: '4px 10px', fontSize: '0.72rem', height: 'auto' }}
+                  >
+                    Activate
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OpenRouter API Key</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showOpenRouterKey ? 'text' : 'password'}
+                    placeholder="sk-or-v1-..."
+                    className="input-field"
+                    value={openRouterKey}
+                    onChange={e => setOpenRouterKey(e.target.value)}
+                    style={{ paddingRight: '45px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowOpenRouterKey(!showOpenRouterKey)}
+                    style={{ position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                  >
+                    {showOpenRouterKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Free models toggle filter */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                <input
+                  type="checkbox"
+                  id="filterFree"
+                  checked={filterFreeModels}
+                  onChange={e => setFilterFreeModels(e.target.checked)}
+                  style={{ cursor: 'pointer', accentColor: 'var(--accent-color)' }}
+                />
+                <label htmlFor="filterFree" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                  Filter Free Models Only
+                </label>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>OpenRouter Model</label>
+                <select
+                  className="input-field"
+                  value={openRouterModel}
+                  onChange={e => setOpenRouterModel(e.target.value)}
+                  disabled={isLoadingModels}
+                >
+                  {isLoadingModels ? (
+                    <option>Loading models list...</option>
+                  ) : displayedModels.length > 0 ? (
+                    displayedModels.map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} {m.isFree ? '(Free)' : ''}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="meta-llama/llama-3-8b-instruct:free">Llama 3 8B Instruct (Free)</option>
+                      <option value="google/gemini-2.5-flash:free">Gemini 2.5 Flash (Free)</option>
+                      <option value="qwen/qwen-2-7b-instruct:free">Qwen 2 7B Instruct (Free)</option>
+                      <option value="microsoft/phi-3-mini-128k-instruct:free">Phi 3 Mini (Free)</option>
+                    </>
+                  )}
+                </select>
+              </div>
+            </div>
           </div>
 
           {/* MongoDB Cloud Synchronization settings */}
