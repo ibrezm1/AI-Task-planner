@@ -48,7 +48,8 @@ export const aiService = {
         existingTasks = [],
         chatHistory = [],
         userFeedback = '',
-        currentDate = new Date().toISOString().split('T')[0]
+        currentDate = new Date().toISOString().split('T')[0],
+        corsProxy
     }) => {
         if (!apiKey) {
             throw new Error(`API Key for ${provider === 'gemini' ? 'Gemini' : (provider === 'nvidia' ? 'Nvidia NIM' : 'OpenRouter')} is missing. Please configure it in Settings.`);
@@ -61,7 +62,7 @@ Your task is to break down the user's recurring learning goal into a highly stru
 The recurring goal is:
 - Title: "${goal.title}"
 - Description: "${goal.description}"
-${goal.category ? `- Category: "${goal.category}"` : ''}
+- Category: "${goal.category || ''}"
 
 Here are the user's existing tasks for this goal (do not repeat these exactly, build upon them):
 ${JSON.stringify(existingTasks.map(t => ({ title: t.title, status: t.status })), null, 2)}
@@ -95,7 +96,10 @@ Each task object in the JSON array must follow this schema:
 
         if (provider === 'gemini') {
             const geminiModel = model || 'gemini-1.5-flash';
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${cleanKey}`;
+            let url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${cleanKey}`;
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -137,7 +141,10 @@ Each task object in the JSON array must follow this schema:
 
         } else if (provider === 'nvidia') {
             const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
-            const url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            let url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -188,7 +195,10 @@ Each task object in the JSON array must follow this schema:
 
         } else {
             const openRouterModel = model || 'meta-llama/llama-3-8b-instruct:free';
-            const url = 'https://openrouter.ai/api/v1/chat/completions';
+            let url = 'https://openrouter.ai/api/v1/chat/completions';
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -247,7 +257,8 @@ Each task object in the JSON array must follow this schema:
         apiKey,
         model,
         goal,
-        chatHistory = []
+        chatHistory = [],
+        corsProxy
     }) => {
         if (!apiKey) {
             throw new Error(`API Key for ${provider === 'gemini' ? 'Gemini' : (provider === 'nvidia' ? 'Nvidia NIM' : 'OpenRouter')} is missing. Please configure it in Settings.`);
@@ -262,7 +273,10 @@ Provide detailed, structured responses formatted in Markdown.`;
 
         if (provider === 'gemini') {
             const geminiModel = model || 'gemini-1.5-flash';
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${cleanKey}`;
+            let url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${cleanKey}`;
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             // Format chat log into Gemini contents
             const contents = chatHistory.map(msg => ({
@@ -298,7 +312,10 @@ Provide detailed, structured responses formatted in Markdown.`;
 
         } else if (provider === 'nvidia') {
             const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
-            const url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            let url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             // Format chat history for standard chat completions
             const messages = [
@@ -340,7 +357,10 @@ Provide detailed, structured responses formatted in Markdown.`;
 
         } else {
             const openRouterModel = model || 'meta-llama/llama-3-8b-instruct:free';
-            const url = 'https://openrouter.ai/api/v1/chat/completions';
+            let url = 'https://openrouter.ai/api/v1/chat/completions';
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             // Format chat history for standard chat completions
             const messages = [
@@ -385,7 +405,8 @@ Provide detailed, structured responses formatted in Markdown.`;
         apiKey,
         model,
         goal,
-        task
+        task,
+        corsProxy
     }) => {
         if (!apiKey) {
             throw new Error(`API Key for ${provider === 'gemini' ? 'Gemini' : (provider === 'nvidia' ? 'Nvidia NIM' : 'OpenRouter')} is missing. Please configure it in Settings.`);
@@ -411,7 +432,10 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
 
         if (provider === 'gemini') {
             const geminiModel = model || 'gemini-1.5-flash';
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${cleanKey}`;
+            let url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${cleanKey}`;
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -444,7 +468,10 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
 
         } else if (provider === 'nvidia') {
             const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
-            const url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            let url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -482,7 +509,10 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
 
         } else {
             const openRouterModel = model || 'meta-llama/llama-3-8b-instruct:free';
-            const url = 'https://openrouter.ai/api/v1/chat/completions';
+            let url = 'https://openrouter.ai/api/v1/chat/completions';
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -517,7 +547,7 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
         }
     },
 
-    testConnection: async ({ provider, apiKey, model }) => {
+    testConnection: async ({ provider, apiKey, model, corsProxy }) => {
         if (!apiKey) {
             throw new Error("API Key is missing.");
         }
@@ -525,7 +555,10 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
 
         if (provider === 'gemini') {
             const geminiModel = model || 'gemini-2.5-flash';
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${cleanKey}`;
+            let url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${cleanKey}`;
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -555,7 +588,10 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
 
         } else if (provider === 'nvidia') {
             const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
-            const url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            let url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -583,7 +619,10 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
 
         } else {
             const openRouterModel = model || 'meta-llama/llama-3-8b-instruct:free';
-            const url = 'https://openrouter.ai/api/v1/chat/completions';
+            let url = 'https://openrouter.ai/api/v1/chat/completions';
+            if (corsProxy) {
+                url = corsProxy + url;
+            }
 
             const response = await fetch(url, {
                 method: 'POST',

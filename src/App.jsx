@@ -33,6 +33,7 @@ export default function App() {
     geminiKey: '',
     openRouterKey: '',
     nvidiaKey: '',
+    corsProxy: '',
     geminiModel: 'gemini-2.5-flash',
     openRouterModel: 'meta-llama/llama-3-8b-instruct:free',
     nvidiaModel: 'meta/llama-3.1-70b-instruct',
@@ -175,6 +176,7 @@ export default function App() {
       geminiKey: '',
       openRouterKey: '',
       nvidiaKey: '',
+      corsProxy: '',
       geminiModel: 'gemini-2.5-flash',
       openRouterModel: 'meta-llama/llama-3-8b-instruct:free',
       nvidiaModel: 'meta/llama-3.1-70b-instruct',
@@ -249,7 +251,8 @@ export default function App() {
         goal,
         existingTasks: goalTasks,
         chatHistory: aiChatLog, // Pass entire conversational context
-        userFeedback: feedbackText
+        userFeedback: feedbackText,
+        corsProxy: settings.corsProxy
       });
 
       if (Array.isArray(generated) && generated.length > 0) {
@@ -328,7 +331,8 @@ export default function App() {
         apiKey,
         model,
         goal,
-        chatHistory: newChatLog
+        chatHistory: newChatLog,
+        corsProxy: settings.corsProxy
       });
 
       setAiChatLog([...newChatLog, {
@@ -380,7 +384,8 @@ export default function App() {
         apiKey,
         model,
         goal,
-        task
+        task,
+        corsProxy: settings.corsProxy
       });
 
       setAiChatLog([...newChatLog, {

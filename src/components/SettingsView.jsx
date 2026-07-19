@@ -45,6 +45,7 @@ export default function SettingsView({
   const [openRouterModelsList, setOpenRouterModelsList] = useState([]);
   const [filterFreeModels, setFilterFreeModels] = useState(settings.filterFreeModels ?? true);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [corsProxy, setCorsProxy] = useState(settings.corsProxy || '');
 
   // MongoDB Settings
   const [mongoApiUrl, setMongoApiUrl] = useState(settings.mongoApiUrl || 'https://verecel-mongo.vercel.app/api/mongo');
@@ -76,6 +77,7 @@ export default function SettingsView({
       setGeminiKey(settings.geminiKey || '');
       setOpenRouterKey(settings.openRouterKey || '');
       setNvidiaKey(settings.nvidiaKey || '');
+      setCorsProxy(settings.corsProxy || '');
       setGeminiModel(settings.geminiModel || 'gemini-1.5-flash');
       setOpenRouterModel(settings.openRouterModel || 'meta-llama/llama-3-8b-instruct:free');
       setNvidiaModel(settings.nvidiaModel || 'meta/llama-3.1-70b-instruct');
@@ -117,6 +119,7 @@ export default function SettingsView({
       geminiKey,
       openRouterKey,
       nvidiaKey,
+      corsProxy,
       geminiModel,
       openRouterModel,
       nvidiaModel,
@@ -160,7 +163,7 @@ export default function SettingsView({
     setTestingGemini(true);
     setGeminiTestResult(null);
     try {
-      const res = await aiService.testConnection({ provider: 'gemini', apiKey: geminiKey, model: geminiModel });
+      const res = await aiService.testConnection({ provider: 'gemini', apiKey: geminiKey, model: geminiModel, corsProxy });
       setGeminiTestResult(res);
     } catch (err) {
       setGeminiTestResult({ success: false, message: err.message });
@@ -177,7 +180,7 @@ export default function SettingsView({
     setTestingNvidia(true);
     setNvidiaTestResult(null);
     try {
-      const res = await aiService.testConnection({ provider: 'nvidia', apiKey: nvidiaKey, model: nvidiaModel });
+      const res = await aiService.testConnection({ provider: 'nvidia', apiKey: nvidiaKey, model: nvidiaModel, corsProxy });
       setNvidiaTestResult(res);
     } catch (err) {
       setNvidiaTestResult({ success: false, message: err.message });
@@ -194,7 +197,7 @@ export default function SettingsView({
     setTestingOpenRouter(true);
     setOpenRouterTestResult(null);
     try {
-      const res = await aiService.testConnection({ provider: 'openrouter', apiKey: openRouterKey, model: openRouterModel });
+      const res = await aiService.testConnection({ provider: 'openrouter', apiKey: openRouterKey, model: openRouterModel, corsProxy });
       setOpenRouterTestResult(res);
     } catch (err) {
       setOpenRouterTestResult({ success: false, message: err.message });
@@ -592,6 +595,23 @@ export default function SettingsView({
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* CORS Proxy URL */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderTop: '1px solid var(--border-color)', paddingTop: '16px', marginTop: '10px' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                CORS Bypass Proxy URL (Optional)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., https://corsproxy.io/?"
+                className="input-field"
+                value={corsProxy}
+                onChange={e => setCorsProxy(e.target.value)}
+              />
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                If your engine provider blocks browser requests (e.g., Nvidia NIM CORS error), route them through a proxy like <code>https://corsproxy.io/?</code> or your own self-hosted proxy. Leave blank for direct connections.
+              </span>
             </div>
           </div>
 
