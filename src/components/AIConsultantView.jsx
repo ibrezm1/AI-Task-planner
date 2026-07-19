@@ -185,11 +185,13 @@ export default function AIConsultantView({
 
   const hasApiKey = aiSettings.provider === 'gemini' 
     ? !!aiSettings.geminiKey 
-    : !!aiSettings.openRouterKey;
+    : (aiSettings.provider === 'nvidia' ? !!aiSettings.nvidiaKey : !!aiSettings.openRouterKey);
 
   const currentModelName = aiSettings.provider === 'gemini'
-    ? (aiSettings.geminiModel || 'gemini-1.5-flash')
-    : (aiSettings.openRouterModel || 'meta-llama/llama-3-8b-instruct:free');
+    ? (aiSettings.geminiModel || 'gemini-2.5-flash')
+    : (aiSettings.provider === 'nvidia' 
+        ? (aiSettings.nvidiaModel || 'meta/llama-3.1-70b-instruct')
+        : (aiSettings.openRouterModel || 'meta-llama/llama-3-8b-instruct:free'));
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '40px' }}>

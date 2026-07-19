@@ -56,6 +56,14 @@ export default function SettingsView({
   const [testingConnection, setTestingConnection] = useState(false);
   const [testResult, setTestResult] = useState(null);
 
+  // AI Connection Test States
+  const [testingGemini, setTestingGemini] = useState(false);
+  const [geminiTestResult, setGeminiTestResult] = useState(null);
+  const [testingNvidia, setTestingNvidia] = useState(false);
+  const [nvidiaTestResult, setNvidiaTestResult] = useState(null);
+  const [testingOpenRouter, setTestingOpenRouter] = useState(false);
+  const [openRouterTestResult, setOpenRouterTestResult] = useState(null);
+
   // Theme Settings
   const [theme, setTheme] = useState(settings.theme || 'dark');
   const [accentColor, setAccentColor] = useState(settings.accentColor || '#8b5cf6');
@@ -141,6 +149,57 @@ export default function SettingsView({
       setTestResult({ success: false, message: err.message });
     } finally {
       setTestingConnection(false);
+    }
+  };
+
+  const handleTestGemini = async () => {
+    if (!geminiKey) {
+      setGeminiTestResult({ success: false, message: 'Please enter Gemini API Key first.' });
+      return;
+    }
+    setTestingGemini(true);
+    setGeminiTestResult(null);
+    try {
+      const res = await aiService.testConnection({ provider: 'gemini', apiKey: geminiKey, model: geminiModel });
+      setGeminiTestResult(res);
+    } catch (err) {
+      setGeminiTestResult({ success: false, message: err.message });
+    } finally {
+      setTestingGemini(false);
+    }
+  };
+
+  const handleTestNvidia = async () => {
+    if (!nvidiaKey) {
+      setNvidiaTestResult({ success: false, message: 'Please enter Nvidia API Key first.' });
+      return;
+    }
+    setTestingNvidia(true);
+    setNvidiaTestResult(null);
+    try {
+      const res = await aiService.testConnection({ provider: 'nvidia', apiKey: nvidiaKey, model: nvidiaModel });
+      setNvidiaTestResult(res);
+    } catch (err) {
+      setNvidiaTestResult({ success: false, message: err.message });
+    } finally {
+      setTestingNvidia(false);
+    }
+  };
+
+  const handleTestOpenRouter = async () => {
+    if (!openRouterKey) {
+      setOpenRouterTestResult({ success: false, message: 'Please enter OpenRouter API Key first.' });
+      return;
+    }
+    setTestingOpenRouter(true);
+    setOpenRouterTestResult(null);
+    try {
+      const res = await aiService.testConnection({ provider: 'openrouter', apiKey: openRouterKey, model: openRouterModel });
+      setOpenRouterTestResult(res);
+    } catch (err) {
+      setOpenRouterTestResult({ success: false, message: err.message });
+    } finally {
+      setTestingOpenRouter(false);
     }
   };
 
@@ -288,6 +347,32 @@ export default function SettingsView({
                   <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
                 </select>
               </div>
+
+              {/* Test Button & Result */}
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={handleTestGemini}
+                  disabled={testingGemini}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.8rem', minWidth: '110px', height: 'auto' }}
+                >
+                  {testingGemini ? <RefreshCw size={12} className="spinner" /> : null}
+                  {testingGemini ? 'Testing...' : 'Test Key'}
+                </button>
+                {geminiTestResult && (
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px', 
+                    fontSize: '0.78rem',
+                    color: geminiTestResult.success ? 'var(--success-color)' : 'var(--danger-color)'
+                  }}>
+                    {geminiTestResult.success ? <Check size={14} /> : <AlertCircle size={14} />}
+                    <span>{geminiTestResult.message}</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Nvidia NIM Configuration Card */}
@@ -357,6 +442,32 @@ export default function SettingsView({
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                   E.g., <code>meta/llama-3.1-70b-instruct</code>, <code>openai/gpt-oss-120b</code>, or <code>deepseek-ai/deepseek-r1</code>.
                 </span>
+              </div>
+
+              {/* Test Button & Result */}
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={handleTestNvidia}
+                  disabled={testingNvidia}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.8rem', minWidth: '110px', height: 'auto' }}
+                >
+                  {testingNvidia ? <RefreshCw size={12} className="spinner" /> : null}
+                  {testingNvidia ? 'Testing...' : 'Test Key'}
+                </button>
+                {nvidiaTestResult && (
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px', 
+                    fontSize: '0.78rem',
+                    color: nvidiaTestResult.success ? 'var(--success-color)' : 'var(--danger-color)'
+                  }}>
+                    {nvidiaTestResult.success ? <Check size={14} /> : <AlertCircle size={14} />}
+                    <span>{nvidiaTestResult.message}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -454,6 +565,32 @@ export default function SettingsView({
                     </>
                   )}
                 </select>
+              </div>
+
+              {/* Test Button & Result */}
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={handleTestOpenRouter}
+                  disabled={testingOpenRouter}
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.8rem', minWidth: '110px', height: 'auto' }}
+                >
+                  {testingOpenRouter ? <RefreshCw size={12} className="spinner" /> : null}
+                  {testingOpenRouter ? 'Testing...' : 'Test Key'}
+                </button>
+                {openRouterTestResult && (
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px', 
+                    fontSize: '0.78rem',
+                    color: openRouterTestResult.success ? 'var(--success-color)' : 'var(--danger-color)'
+                  }}>
+                    {openRouterTestResult.success ? <Check size={14} /> : <AlertCircle size={14} />}
+                    <span>{openRouterTestResult.message}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -515,5 +515,101 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
             }
             return text;
         }
+    },
+
+    testConnection: async ({ provider, apiKey, model }) => {
+        if (!apiKey) {
+            throw new Error("API Key is missing.");
+        }
+        const cleanKey = apiKey.trim();
+
+        if (provider === 'gemini') {
+            const geminiModel = model || 'gemini-2.5-flash';
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${cleanKey}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            role: 'user',
+                            parts: [
+                                { text: "Ping" }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        maxOutputTokens: 5
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Gemini API error: ${response.status} - ${errText}`);
+            }
+            return { success: true, message: "Gemini Key validated successfully!" };
+
+        } else if (provider === 'nvidia') {
+            const nvidiaModel = model || 'meta/llama-3.1-70b-instruct';
+            const url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${cleanKey}`
+                },
+                body: JSON.stringify({
+                    model: nvidiaModel,
+                    messages: [
+                        {
+                            role: 'user',
+                            content: "Ping"
+                        }
+                    ],
+                    max_tokens: 5
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Nvidia NIM API error: ${response.status} - ${errText}`);
+            }
+            return { success: true, message: "Nvidia NIM Key validated successfully!" };
+
+        } else {
+            const openRouterModel = model || 'meta-llama/llama-3-8b-instruct:free';
+            const url = 'https://openrouter.ai/api/v1/chat/completions';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${cleanKey}`,
+                    'HTTP-Referer': 'http://localhost:3000',
+                    'X-Title': 'AI Task Generator Tracker'
+                },
+                body: JSON.stringify({
+                    model: openRouterModel,
+                    messages: [
+                        {
+                            role: 'user',
+                            content: "Ping"
+                        }
+                    ],
+                    max_tokens: 5
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`OpenRouter API error: ${response.status} - ${errText}`);
+            }
+            return { success: true, message: "OpenRouter Key validated successfully!" };
+        }
     }
 };
