@@ -124,6 +124,18 @@ const renderMarkdown = (text) => {
 
         const key = `line-${codeIdx}-${blockIdx}-${lineIdx}`;
 
+        if (trimmed.startsWith('---') || trimmed.startsWith('***') || trimmed.startsWith('___')) {
+          return <hr key={key} style={{ border: 'none', height: '1px', backgroundColor: 'var(--border-color)', margin: '16px 0' }} />;
+        }
+        if (line.startsWith('###### ')) {
+          return <h6 key={key} style={{ margin: '8px 0 4px 0', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase' }}>{renderLineContent(line.replace('###### ', ''))}</h6>;
+        }
+        if (line.startsWith('##### ')) {
+          return <h6 key={key} style={{ margin: '8px 0 4px 0', color: 'var(--text-secondary)', fontWeight: 700, fontSize: '0.85rem' }}>{renderLineContent(line.replace('##### ', ''))}</h6>;
+        }
+        if (line.startsWith('#### ')) {
+          return <h5 key={key} style={{ margin: '10px 0 4px 0', color: 'var(--text-secondary)', fontWeight: 700, fontSize: '0.95rem' }}>{renderLineContent(line.replace('#### ', ''))}</h5>;
+        }
         if (line.startsWith('### ')) {
           return <h4 key={key} style={{ margin: '12px 0 6px 0', color: 'var(--accent-color)', fontWeight: 700 }}>{renderLineContent(line.replace('### ', ''))}</h4>;
         }
