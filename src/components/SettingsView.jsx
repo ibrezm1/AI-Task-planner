@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { aiService } from '../services/aiService';
 import { mongoSync } from '../services/mongoSync';
-import { THEME_PRESETS, ACCENT_COLORS } from './ThemeManager';
+import { THEME_PRESETS, ACCENT_COLORS, applyTheme } from './ThemeManager';
 
 export default function SettingsView({ 
   settings, 
@@ -92,6 +92,18 @@ export default function SettingsView({
       setBorderRadius(settings.borderRadius ?? 16);
     }
   }, [settings]);
+
+  // Live preview of styling changes
+  useEffect(() => {
+    applyTheme(theme, accentColor, borderRadius);
+    
+    // Revert to saved settings on unmount if not saved
+    return () => {
+      if (settings) {
+        applyTheme(settings.theme, settings.accentColor, settings.borderRadius);
+      }
+    };
+  }, [theme, accentColor, borderRadius, settings]);
 
   // Trigger loading OpenRouter models list on mount or when provider swaps
   useEffect(() => {

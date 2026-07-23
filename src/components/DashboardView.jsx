@@ -6,8 +6,29 @@ import {
   Target, 
   Sparkles,
   AlertCircle,
-  Plus
+  Plus,
+  ExternalLink
 } from 'lucide-react';
+
+const getAIExternalLinks = (task, goals) => {
+  const goal = goals.find(g => g.id === task.goalId);
+  const goalTitle = goal ? goal.title : '';
+  const queryText = `How to accomplish task: "${task.title}"${task.description ? ` (${task.description})` : ''}${goalTitle ? ` under the goal: "${goalTitle}"` : ''}? Give me step-by-step guidance, useful resources, and practical tips.`;
+  const encodedQuery = encodeURIComponent(queryText);
+  return {
+    queryText,
+    links: [
+      { name: 'ChatGPT', url: `https://chatgpt.com/?q=${encodedQuery}&hints=search&temporary-chat=true` },
+      { name: 'Perplexity', url: `https://www.perplexity.ai/search?q=${encodedQuery}` },
+      { name: 'Google Search', url: `https://www.google.com/search?q=${encodedQuery}` },
+      { name: 'Duck AI', url: `https://duckduckgo.com/?q=${encodedQuery}&ia=chat` },
+      { name: 'Brave Search', url: `https://search.brave.com/search?q=${encodedQuery}` },
+      { name: 'Mistral AI', url: `https://chat.mistral.ai/chat?q=${encodedQuery}` },
+      { name: 'Grok AI', url: `https://grok.com/?q=${encodedQuery}` },
+      { name: 'Meta AI (Copy Prompt)', url: `https://www.meta.ai/` }
+    ]
+  };
+};
 
 export default function DashboardView({ 
   goals = [], 
@@ -15,6 +36,15 @@ export default function DashboardView({
   setView,
   onConsultTaskAI
 }) {
+  const [activeExternalMenuTaskId, setActiveExternalMenuTaskId] = React.useState(null);
+
+  React.useEffect(() => {
+    if (activeExternalMenuTaskId === null) return;
+    const handleOutsideClick = () => setActiveExternalMenuTaskId(null);
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, [activeExternalMenuTaskId]);
+
   const activeGoalsCount = goals.length;
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.status === 'completed');
@@ -234,17 +264,56 @@ export default function DashboardView({
                       </div>
                       
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        {onConsultTaskAI && (
-                          <button
-                            onClick={() => onConsultTaskAI(task)}
-                            className="btn btn-secondary"
-                            style={{ padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--accent-glow)' }}
-                            title="Ask AI for study tips and start ideas"
-                          >
-                            <Sparkles size={12} color="var(--accent-color)" />
-                            <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>AI Help</span>
-                          </button>
-                        )}
+                         {onConsultTaskAI && (
+                           <>
+                             <button
+                               onClick={() => onConsultTaskAI(task)}
+                               className="btn btn-secondary"
+                               style={{ padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--accent-glow)' }}
+                               title="Ask AI for study tips and start ideas"
+                             >
+                               <Sparkles size={12} color="var(--accent-color)" />
+                               <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>AI Help</span>
+                             </button>
+                             
+                             <div style={{ position: 'relative', display: 'inline-block' }}>
+                               <button
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   setActiveExternalMenuTaskId(activeExternalMenuTaskId === task.id ? null : task.id);
+                                 }}
+                                 className="btn btn-secondary"
+                                 style={{ padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--border-color)' }}
+                                 title="Search with external AI tools"
+                               >
+                                 <ExternalLink size={12} />
+                               </button>
+                               {activeExternalMenuTaskId === task.id && (() => {
+                                 const { queryText, links } = getAIExternalLinks(task, goals);
+                                 return (
+                                   <div className="ai-dropdown-menu" style={{ bottom: 'auto', top: '100%', marginTop: '6px' }}>
+                                     {links.map(link => (
+                                       <a 
+                                         key={link.name}
+                                         href={link.url}
+                                         target="_blank"
+                                         rel="noreferrer"
+                                         className="ai-dropdown-item"
+                                         onClick={() => {
+                                           navigator.clipboard.writeText(queryText).catch(() => {});
+                                           setActiveExternalMenuTaskId(null);
+                                         }}
+                                       >
+                                         <ExternalLink size={10} style={{ opacity: 0.7 }} />
+                                         {link.name}
+                                       </a>
+                                     ))}
+                                   </div>
+                                 );
+                               })()}
+                             </div>
+                           </>
+                         )}
                         <span style={{
                           fontSize: '0.75rem',
                           fontWeight: 700,

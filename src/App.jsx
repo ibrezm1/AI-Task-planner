@@ -613,6 +613,7 @@ export default function App() {
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
             onConsultTaskAI={triggerTaskHelp}
+            onAddTasks={handleAddTasks}
           />
         )}
 

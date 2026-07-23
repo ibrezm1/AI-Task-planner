@@ -6,9 +6,30 @@ import {
   CheckSquare, 
   Square,
   Clock,
-  Sparkles
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+
+const getAIExternalLinks = (task, goals) => {
+  const goal = goals.find(g => g.id === task.goalId);
+  const goalTitle = goal ? goal.title : '';
+  const queryText = `How to accomplish task: "${task.title}"${task.description ? ` (${task.description})` : ''}${goalTitle ? ` under the goal: "${goalTitle}"` : ''}? Give me step-by-step guidance, useful resources, and practical tips.`;
+  const encodedQuery = encodeURIComponent(queryText);
+  return {
+    queryText,
+    links: [
+      { name: 'ChatGPT', url: `https://chatgpt.com/?q=${encodedQuery}&hints=search&temporary-chat=true` },
+      { name: 'Perplexity', url: `https://www.perplexity.ai/search?q=${encodedQuery}` },
+      { name: 'Google Search', url: `https://www.google.com/search?q=${encodedQuery}` },
+      { name: 'Duck AI', url: `https://duckduckgo.com/?q=${encodedQuery}&ia=chat` },
+      { name: 'Brave Search', url: `https://search.brave.com/search?q=${encodedQuery}` },
+      { name: 'Mistral AI', url: `https://chat.mistral.ai/chat?q=${encodedQuery}` },
+      { name: 'Grok AI', url: `https://grok.com/?q=${encodedQuery}` },
+      { name: 'Meta AI (Copy Prompt)', url: `https://www.meta.ai/` }
+    ]
+  };
+};
 
 export default function CalendarView({ 
   goals = [], 
@@ -19,6 +40,14 @@ export default function CalendarView({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateTasks, setSelectedDateTasks] = useState(null);
   const [selectedDateStr, setSelectedDateStr] = useState('');
+  const [activeExternalMenuTaskId, setActiveExternalMenuTaskId] = useState(null);
+
+  React.useEffect(() => {
+    if (activeExternalMenuTaskId === null) return;
+    const handleOutsideClick = () => setActiveExternalMenuTaskId(null);
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, [activeExternalMenuTaskId]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -299,23 +328,69 @@ export default function CalendarView({
                           )}
                         </div>
 
-                        {onConsultTaskAI && (
-                          <button
-                            onClick={() => onConsultTaskAI(task)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              color: 'var(--accent-color)',
-                              padding: '2px',
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}
-                            title="Ask AI for study tips and start ideas"
-                          >
-                            <Sparkles size={14} />
-                          </button>
-                        )}
+                         {onConsultTaskAI && (
+                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                             <button
+                               onClick={() => onConsultTaskAI(task)}
+                               style={{
+                                 background: 'none',
+                                 border: 'none',
+                                 cursor: 'pointer',
+                                 color: 'var(--accent-color)',
+                                 padding: '2px',
+                                 display: 'flex',
+                                 alignItems: 'center'
+                               }}
+                               title="Ask AI for study tips and start ideas"
+                             >
+                               <Sparkles size={14} />
+                             </button>
+                             
+                             <div style={{ position: 'relative', display: 'inline-block' }}>
+                               <button
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   setActiveExternalMenuTaskId(activeExternalMenuTaskId === task.id ? null : task.id);
+                                 }}
+                                 style={{
+                                   background: 'none',
+                                   border: 'none',
+                                   cursor: 'pointer',
+                                   color: 'var(--text-secondary)',
+                                   padding: '2px',
+                                   display: 'flex',
+                                   alignItems: 'center'
+                                 }}
+                                 title="Search with external AI tools"
+                               >
+                                 <ExternalLink size={14} />
+                               </button>
+                               {activeExternalMenuTaskId === task.id && (() => {
+                                 const { queryText, links } = getAIExternalLinks(task, goals);
+                                 return (
+                                   <div className="ai-dropdown-menu" style={{ transform: 'translateX(30%)' }}>
+                                     {links.map(link => (
+                                       <a 
+                                         key={link.name}
+                                         href={link.url}
+                                         target="_blank"
+                                         rel="noreferrer"
+                                         className="ai-dropdown-item"
+                                         onClick={() => {
+                                           navigator.clipboard.writeText(queryText).catch(() => {});
+                                           setActiveExternalMenuTaskId(null);
+                                         }}
+                                       >
+                                         <ExternalLink size={10} style={{ opacity: 0.7 }} />
+                                         {link.name}
+                                       </a>
+                                     ))}
+                                   </div>
+                                 );
+                               })()}
+                             </div>
+                           </div>
+                         )}
                       </div>
                       <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: 0, lineBreak: 'anywhere' }}>
                         {task.description}
