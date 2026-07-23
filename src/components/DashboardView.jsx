@@ -25,7 +25,10 @@ const getAIExternalLinks = (task, goals) => {
       { name: 'Brave Search', url: `https://search.brave.com/search?q=${encodedQuery}` },
       { name: 'Mistral AI', url: `https://chat.mistral.ai/chat?q=${encodedQuery}` },
       { name: 'Grok AI', url: `https://grok.com/?q=${encodedQuery}` },
-      { name: 'Meta AI (Copy Prompt)', url: `https://www.meta.ai/` }
+      { name: 'Meta AI (Copy Prompt)', url: `https://www.meta.ai/` },
+      { name: 'DeepSeek Chat (Copy Prompt)', url: `https://chat.deepseek.com/` },
+      { name: 'Moonshot Kimi (Copy Prompt)', url: `https://kimi.moonshot.cn/` },
+      { name: 'LongCat AI (Copy Prompt)', url: `https://longcat.chat/` }
     ]
   };
 };
