@@ -652,3 +652,84 @@ Keep your response concise, encouraging, and formatted in clear Markdown.`;
         }
     }
 };
+
+export const DEFAULT_EXTERNAL_AI_TOOLS = [
+  {
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    redirectionMethod: 'direct',
+    urlTemplate: 'https://chatgpt.com/?q={query}&hints=search&temporary-chat=true',
+    customInstructions: ''
+  },
+  {
+    id: 'perplexity',
+    name: 'Perplexity',
+    redirectionMethod: 'direct',
+    urlTemplate: 'https://www.perplexity.ai/search?q={query}',
+    customInstructions: ''
+  },
+  {
+    id: 'google-search',
+    name: 'Google Search',
+    redirectionMethod: 'direct',
+    urlTemplate: 'https://www.google.com/search?q={query}',
+    customInstructions: ''
+  },
+  {
+    id: 'duck-ai',
+    name: 'Duck AI',
+    redirectionMethod: 'direct',
+    urlTemplate: 'https://duckduckgo.com/?q={query}&ia=chat',
+    customInstructions: ''
+  },
+  {
+    id: 'brave-search',
+    name: 'Brave Search',
+    redirectionMethod: 'direct',
+    urlTemplate: 'https://search.brave.com/search?q={query}',
+    customInstructions: ''
+  },
+  {
+    id: 'mistral',
+    name: 'Mistral AI',
+    redirectionMethod: 'direct',
+    urlTemplate: 'https://chat.mistral.ai/chat?q={query}',
+    customInstructions: ''
+  },
+  {
+    id: 'grok',
+    name: 'Grok AI',
+    redirectionMethod: 'direct',
+    urlTemplate: 'https://grok.com/?q={query}',
+    customInstructions: ''
+  },
+  {
+    id: 'meta',
+    name: 'Meta AI (Copy Prompt)',
+    redirectionMethod: 'copy',
+    urlTemplate: 'https://www.meta.ai/',
+    customInstructions: ''
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek Chat (Copy Prompt)',
+    redirectionMethod: 'copy',
+    urlTemplate: 'https://chat.deepseek.com/',
+    customInstructions: ''
+  },
+  {
+    id: 'kimi',
+    name: 'Moonshot Kimi (Copy Prompt)',
+    redirectionMethod: 'copy',
+    urlTemplate: 'https://kimi.moonshot.cn/',
+    customInstructions: ''
+  },
+  {
+    id: 'longcat',
+    name: 'LongCat AI (Copy Prompt)',
+    redirectionMethod: 'copy',
+    urlTemplate: 'https://longcat.chat/',
+    customInstructions: ''
+  }
+];
+

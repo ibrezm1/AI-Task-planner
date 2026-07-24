@@ -12,9 +12,13 @@ import {
   Trash2,
   Moon,
   Info,
-  RefreshCw
+  RefreshCw,
+  Plus,
+  Edit3,
+  RotateCcw,
+  Sparkles
 } from 'lucide-react';
-import { aiService } from '../services/aiService';
+import { aiService, DEFAULT_EXTERNAL_AI_TOOLS } from '../services/aiService';
 import { mongoSync } from '../services/mongoSync';
 import { THEME_PRESETS, ACCENT_COLORS, applyTheme } from './ThemeManager';
 
@@ -70,6 +74,14 @@ export default function SettingsView({
   const [accentColor, setAccentColor] = useState(settings.accentColor || '#8b5cf6');
   const [borderRadius, setBorderRadius] = useState(settings.borderRadius ?? 16);
 
+  // External AI Tools Config State
+  const [externalAiTools, setExternalAiTools] = useState(settings.externalAiTools || DEFAULT_EXTERNAL_AI_TOOLS);
+  const [editingToolId, setEditingToolId] = useState(null); // null, 'new', or string ID
+  const [toolName, setToolName] = useState('');
+  const [toolMethod, setToolMethod] = useState('direct');
+  const [toolTemplate, setToolTemplate] = useState('');
+  const [toolInstructions, setToolInstructions] = useState('');
+
   // Sync local inputs if settings prop updates (e.g. loaded asynchronously from localStorage)
   useEffect(() => {
     if (settings) {
@@ -90,6 +102,7 @@ export default function SettingsView({
       setTheme(settings.theme || 'dark');
       setAccentColor(settings.accentColor || '#8b5cf6');
       setBorderRadius(settings.borderRadius ?? 16);
+      setExternalAiTools(settings.externalAiTools || DEFAULT_EXTERNAL_AI_TOOLS);
     }
   }, [settings]);
 
@@ -143,9 +156,85 @@ export default function SettingsView({
       mongoDocumentId,
       theme,
       accentColor,
-      borderRadius
+      borderRadius,
+      externalAiTools
     });
     alert('Settings saved successfully!');
+  };
+
+  // External AI Tools CRUD Handlers
+  const handleEditToolClick = (tool) => {
+    setEditingToolId(tool.id);
+    setToolName(tool.name);
+    setToolMethod(tool.redirectionMethod);
+    setToolTemplate(tool.urlTemplate);
+    setToolInstructions(tool.customInstructions || '');
+  };
+
+  const handleAddToolClick = () => {
+    setEditingToolId('new');
+    setToolName('');
+    setToolMethod('direct');
+    setToolTemplate('');
+    setToolInstructions('');
+  };
+
+  const handleCancelEditTool = () => {
+    setEditingToolId(null);
+    setToolName('');
+    setToolMethod('direct');
+    setToolTemplate('');
+    setToolInstructions('');
+  };
+
+  const handleSaveTool = (e) => {
+    e.preventDefault();
+    if (!toolName.trim()) {
+      alert('Please enter a Provider Name.');
+      return;
+    }
+    if (!toolTemplate.trim()) {
+      alert('Please enter a URL Template.');
+      return;
+    }
+
+    if (editingToolId === 'new') {
+      const newTool = {
+        id: `custom-tool-${Date.now()}`,
+        name: toolName.trim(),
+        redirectionMethod: toolMethod,
+        urlTemplate: toolTemplate.trim(),
+        customInstructions: toolInstructions.trim()
+      };
+      setExternalAiTools(prev => [...prev, newTool]);
+    } else {
+      setExternalAiTools(prev => prev.map(t => {
+        if (t.id === editingToolId) {
+          return {
+            ...t,
+            name: toolName.trim(),
+            redirectionMethod: toolMethod,
+            urlTemplate: toolTemplate.trim(),
+            customInstructions: toolInstructions.trim()
+          };
+        }
+        return t;
+      }));
+    }
+
+    handleCancelEditTool();
+  };
+
+  const handleDeleteTool = (toolId) => {
+    if (window.confirm("Are you sure you want to delete this AI redirection tool?")) {
+      setExternalAiTools(prev => prev.filter(t => t.id !== toolId));
+    }
+  };
+
+  const handleResetToolsToDefault = () => {
+    if (window.confirm("Are you sure you want to reset the redirection tools to the default list? This will overwrite your custom tools.")) {
+      setExternalAiTools(DEFAULT_EXTERNAL_AI_TOOLS);
+    }
   };
 
   // Test MongoDB Connection
@@ -729,6 +818,193 @@ export default function SettingsView({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* External AI Tools Card */}
+          <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
+                <Sparkles size={18} color="var(--accent-color)" />
+                External AI Redirection Tools
+              </h3>
+              {editingToolId === null && (
+                <button
+                  type="button"
+                  onClick={handleResetToolsToDefault}
+                  className="btn btn-secondary"
+                  style={{ padding: '4px 10px', fontSize: '0.75rem', height: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  title="Reset redirection tools to default list"
+                >
+                  <RotateCcw size={12} />
+                  Reset to Defaults
+                </button>
+              )}
+            </div>
+
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
+              Customize the AI web platforms shown in the "Search with external AI tools" dropdown on tasks. Appended instructions will be included in the clipboard copy query.
+            </p>
+
+            {editingToolId === null ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '400px', overflowY: 'auto', paddingRight: '4px' }}>
+                  {externalAiTools.map(tool => (
+                    <div 
+                      key={tool.id}
+                      style={{
+                        padding: '14px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '12px',
+                        transition: 'all 0.2s ease'
+                      }}
+                      className="hover-card"
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>{tool.name}</span>
+                          <span style={{ 
+                            fontSize: '0.7rem', 
+                            padding: '2px 8px', 
+                            borderRadius: '12px', 
+                            fontWeight: 600,
+                            backgroundColor: tool.redirectionMethod === 'direct' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                            color: tool.redirectionMethod === 'direct' ? 'var(--accent-color)' : 'var(--success-color)'
+                          }}>
+                            {tool.redirectionMethod === 'direct' ? 'Direct Redirect' : 'Copy Prompt'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }} title={tool.urlTemplate}>
+                          <strong>URL:</strong> {tool.urlTemplate}
+                        </div>
+                        {tool.customInstructions && (
+                          <div style={{ fontSize: '0.75rem', color: 'var(--accent-color)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }} title={tool.customInstructions}>
+                            <strong>Instructions:</strong> {tool.customInstructions}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleEditToolClick(tool)}
+                          className="btn btn-secondary"
+                          style={{ padding: '6px 8px', borderRadius: '6px', height: 'auto' }}
+                          title="Edit tool configuration"
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTool(tool.id)}
+                          className="btn btn-danger"
+                          style={{ padding: '6px 8px', borderRadius: '6px', height: 'auto', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger-color)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+                          title="Delete tool"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddToolClick}
+                  className="btn btn-secondary"
+                  style={{ width: '100%', justifyContent: 'center', marginTop: '4px', gap: '6px' }}
+                >
+                  <Plus size={14} />
+                  Add Custom AI Tool
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSaveTool} style={{ display: 'flex', flexDirection: 'column', gap: '14px', padding: '16px', borderRadius: '12px', border: '1.5px solid var(--accent-color)', backgroundColor: 'rgba(var(--accent-color-rgb), 0.02)' }} className="fade-in">
+                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--accent-color)' }}>
+                  {editingToolId === 'new' ? 'Add New AI Tool' : 'Edit AI Tool'}
+                </h4>
+
+                {/* Provider Name */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Provider Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. ChatGPT, Claude, custom tool"
+                    className="input-field"
+                    value={toolName}
+                    onChange={e => setToolName(e.target.value)}
+                  />
+                </div>
+
+                {/* Redirection Method */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Redirection Method</label>
+                  <select
+                    className="input-field"
+                    value={toolMethod}
+                    onChange={e => setToolMethod(e.target.value)}
+                  >
+                    <option value="direct">Direct URL Redirection (Replaces {'{query}'} placeholder)</option>
+                    <option value="copy">Copy Prompt & Open URL</option>
+                  </select>
+                </div>
+
+                {/* URL Template */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>URL Template</label>
+                  <input
+                    type="url"
+                    required
+                    placeholder="https://example.com/?q={query}"
+                    className="input-field"
+                    value={toolTemplate}
+                    onChange={e => setToolTemplate(e.target.value)}
+                  />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    {toolMethod === 'direct' 
+                      ? 'Include {query} in the template. It will automatically be replaced with your URL-encoded query.' 
+                      : 'Provide the destination URL. Clicking it will open the URL and copy the prompt to your clipboard.'}
+                  </span>
+                </div>
+
+                {/* Custom Instructions */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Custom Instructions (Optional)</label>
+                  <textarea
+                    placeholder="e.g. explain only in English, write in bullet points"
+                    className="input-field"
+                    style={{ minHeight: '80px', fontFamily: 'inherit', resize: 'vertical' }}
+                    value={toolInstructions}
+                    onChange={e => setToolInstructions(e.target.value)}
+                  />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    These instructions will be appended to your query prompt before sending/copying.
+                  </span>
+                </div>
+
+                {/* Form Buttons */}
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={handleCancelEditTool}
+                    className="btn btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                  >
+                    Save Tool
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
 

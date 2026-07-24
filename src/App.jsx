@@ -8,7 +8,7 @@ import CalendarView from './components/CalendarView';
 import SettingsView from './components/SettingsView';
 import ThemeManager, { applyTheme } from './components/ThemeManager';
 import { mongoSync } from './services/mongoSync';
-import { aiService } from './services/aiService';
+import { aiService, DEFAULT_EXTERNAL_AI_TOOLS } from './services/aiService';
 import { Sparkles, Check, AlertTriangle, Menu } from 'lucide-react';
 
 const LOCAL_STORAGE_KEY = 'ai_task_tracker_state_v1';
@@ -45,7 +45,8 @@ export default function App() {
     mongoDocumentId: 'ai_task_tracker_sync',
     theme: 'dark',
     accentColor: '#8b5cf6',
-    borderRadius: 16
+    borderRadius: 16,
+    externalAiTools: DEFAULT_EXTERNAL_AI_TOOLS
   });
 
   // Async Background AI Task Generation State
@@ -71,7 +72,11 @@ export default function App() {
         if (parsed.goals) setGoals(parsed.goals);
         if (parsed.tasks) setTasks(parsed.tasks);
         if (parsed.settings) {
-          const loadedSettings = { ...settings, ...parsed.settings };
+          const loadedSettings = { 
+            externalAiTools: DEFAULT_EXTERNAL_AI_TOOLS,
+            ...settings, 
+            ...parsed.settings 
+          };
           setSettings(loadedSettings);
           // Apply theme immediately
           applyTheme(loadedSettings.theme, loadedSettings.accentColor, loadedSettings.borderRadius);
@@ -566,6 +571,7 @@ export default function App() {
           <DashboardView 
             goals={goals}
             tasks={tasks}
+            settings={settings}
             setView={handleSetView}
             onConsultTaskAI={triggerTaskHelp}
           />
@@ -610,6 +616,7 @@ export default function App() {
           <TaskBoardView 
             goals={goals}
             tasks={tasks}
+            settings={settings}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
             onConsultTaskAI={triggerTaskHelp}
@@ -621,6 +628,7 @@ export default function App() {
           <CalendarView 
             goals={goals}
             tasks={tasks}
+            settings={settings}
             onUpdateTask={handleUpdateTask}
             onConsultTaskAI={triggerTaskHelp}
           />

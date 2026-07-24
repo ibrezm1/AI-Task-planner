@@ -9,33 +9,40 @@ import {
   Plus,
   ExternalLink
 } from 'lucide-react';
+import { DEFAULT_EXTERNAL_AI_TOOLS } from '../services/aiService';
 
-const getAIExternalLinks = (task, goals) => {
+const getAIExternalLinks = (task, goals, settings) => {
   const goal = goals.find(g => g.id === task.goalId);
   const goalTitle = goal ? goal.title : '';
-  const queryText = `How to accomplish task: "${task.title}"${task.description ? ` (${task.description})` : ''}${goalTitle ? ` under the goal: "${goalTitle}"` : ''}? Give me step-by-step guidance, useful resources, and practical tips.`;
-  const encodedQuery = encodeURIComponent(queryText);
+  const baseQueryText = `How to accomplish task: "${task.title}"${task.description ? ` (${task.description})` : ''}${goalTitle ? ` under the goal: "${goalTitle}"` : ''}? Give me step-by-step guidance, useful resources, and practical tips.`;
+  
+  const tools = settings?.externalAiTools || DEFAULT_EXTERNAL_AI_TOOLS;
+  
   return {
-    queryText,
-    links: [
-      { name: 'ChatGPT', url: `https://chatgpt.com/?q=${encodedQuery}&hints=search&temporary-chat=true` },
-      { name: 'Perplexity', url: `https://www.perplexity.ai/search?q=${encodedQuery}` },
-      { name: 'Google Search', url: `https://www.google.com/search?q=${encodedQuery}` },
-      { name: 'Duck AI', url: `https://duckduckgo.com/?q=${encodedQuery}&ia=chat` },
-      { name: 'Brave Search', url: `https://search.brave.com/search?q=${encodedQuery}` },
-      { name: 'Mistral AI', url: `https://chat.mistral.ai/chat?q=${encodedQuery}` },
-      { name: 'Grok AI', url: `https://grok.com/?q=${encodedQuery}` },
-      { name: 'Meta AI (Copy Prompt)', url: `https://www.meta.ai/` },
-      { name: 'DeepSeek Chat (Copy Prompt)', url: `https://chat.deepseek.com/` },
-      { name: 'Moonshot Kimi (Copy Prompt)', url: `https://kimi.moonshot.cn/` },
-      { name: 'LongCat AI (Copy Prompt)', url: `https://longcat.chat/` }
-    ]
+    links: tools.map(tool => {
+      let finalQuery = baseQueryText;
+      if (tool.customInstructions && tool.customInstructions.trim()) {
+        finalQuery += `\n\nCustom Instructions:\n${tool.customInstructions.trim()}`;
+      }
+      const encodedQuery = encodeURIComponent(finalQuery);
+      let url = tool.urlTemplate || '';
+      if (tool.redirectionMethod === 'direct') {
+        url = url.replace('{query}', encodedQuery);
+      }
+      return {
+        name: tool.name,
+        url,
+        queryText: finalQuery
+      };
+    })
   };
 };
+
 
 export default function DashboardView({ 
   goals = [], 
   tasks = [], 
+  settings,
   setView,
   onConsultTaskAI
 }) {
@@ -292,7 +299,7 @@ export default function DashboardView({
                                  <ExternalLink size={12} />
                                </button>
                                {activeExternalMenuTaskId === task.id && (() => {
-                                 const { queryText, links } = getAIExternalLinks(task, goals);
+                                 const { links } = getAIExternalLinks(task, goals, settings);
                                  return (
                                    <div className="ai-dropdown-menu" style={{ bottom: 'auto', top: '100%', marginTop: '6px' }}>
                                      {links.map(link => (
@@ -303,7 +310,7 @@ export default function DashboardView({
                                          rel="noreferrer"
                                          className="ai-dropdown-item"
                                          onClick={() => {
-                                           navigator.clipboard.writeText(queryText).catch(() => {});
+                                           navigator.clipboard.writeText(link.queryText).catch(() => {});
                                            setActiveExternalMenuTaskId(null);
                                          }}
                                        >
